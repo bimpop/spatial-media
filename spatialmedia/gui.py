@@ -94,6 +94,9 @@ class Application(Frame):
         if not metadata:
             self.var_3d.set(0)
 
+        if not metadata:
+            self.var_3d_lr.set(0)
+
         if not audio_metadata:
             self.var_spatial_audio.set(0)
 
@@ -110,6 +113,11 @@ class Application(Frame):
             else:
                 self.var_3d.set(0)
 
+            if metadata.get("StereoMode", "") == "left-right":
+                self.var_3d_lr.set(1)
+            else:
+                self.var_3d_lr.set(0)
+
         if audio_metadata:
             self.var_spatial_audio.set(1)
             print(audio_metadata.get_metadata_string())
@@ -120,6 +128,8 @@ class Application(Frame):
         stereo = None
         if (self.var_3d.get()):
             stereo = "top-bottom"
+        if (self.var_3d_lr.get()):
+            stereo = "left-right"
 
         metadata = metadata_utils.Metadata()
         metadata.video = metadata_utils.generate_spherical_xml(stereo=stereo)
@@ -163,6 +173,9 @@ class Application(Frame):
     def action_set_3d(self):
         self.update_state()
 
+    def action_set_3d_lr(self):
+        self.update_state()
+
     def enable_state(self):
         self.button_open.configure(state="normal")
 
@@ -170,6 +183,7 @@ class Application(Frame):
         self.checkbox_spherical.configure(state="disabled")
         self.checkbox_spatial_audio.configure(state="disabled")
         self.checkbox_3D.configure(state="disabled")
+        self.checkbox_3D_LR.configure(state="disabled")
         self.button_inject.configure(state="disabled")
         self.button_open.configure(state="disabled")
 
@@ -177,11 +191,13 @@ class Application(Frame):
         self.checkbox_spherical.configure(state="normal")
         if self.var_spherical.get():
             self.checkbox_3D.configure(state="normal")
+            self.checkbox_3D_LR.configure(state="normal")
             self.button_inject.configure(state="normal")
             if self.spatial_audio_description.is_supported:
                 self.checkbox_spatial_audio.configure(state="normal")
         else:
             self.checkbox_3D.configure(state="disabled")
+            self.checkbox_3D_LR.configure(state="disabled")
             self.button_inject.configure(state="disabled")
             self.checkbox_spatial_audio.configure(state="disabled")
         if self.spatial_audio_description.has_head_locked_stereo:
@@ -242,6 +258,19 @@ class Application(Frame):
         self.checkbox_3D = Checkbutton(self, variable=self.var_3d)
         self.checkbox_3D["command"] = self.action_set_3d
         self.checkbox_3D.grid(row=row, column=column, padx=PAD_X, pady=2)
+
+        # 3D_LR
+        row = row + 1
+        column = 0
+        self.label_3D_LR = Label(self, anchor=W)
+        self.label_3D_LR["text"] = "My video is stereoscopic 3D (left/right layout)"
+        self.label_3D_LR.grid(row=row, column=column, padx=PAD_X, pady=7, sticky=W)
+        column += 1
+
+        self.var_3d_lr = IntVar()
+        self.checkbox_3D_LR = Checkbutton(self, variable=self.var_3d_lr)
+        self.checkbox_3D_LR["command"] = self.action_set_3d_lr
+        self.checkbox_3D_LR.grid(row=row, column=column, padx=PAD_X, pady=2)
 
         # Spatial Audio Checkbox
         row += 1
